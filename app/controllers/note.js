@@ -6,9 +6,23 @@ const {
     deleteById 
 } = require('../services/note');
 
+const Joi = require('joi');
+
+// Validate request body
+function noteValidation(note) {
+    const schema = {
+        title: Joi.string().required(),
+        body: Joi.string().required()
+    };
+
+    return Joi.validate(note, schema);
+}
+
 module.exports = {
     insertNote: (req, res) => {
         const body = req.body;
+        const { error } = noteValidation(req.body);
+        if (error) return res.status(400).send(error.details[0].message);
         insert(body, (err, results) => {
             if (err) {
                 console.log(err);
@@ -68,6 +82,8 @@ module.exports = {
     updateNote: (req, res) => {
         const id = req.params.id;
         const body = req.body;
+        const { error } = noteValidation(req.body);
+        if (error) return res.status(400).send(error.details[0].message);
         getById(id, (err, results) => {
             if (err) {
                 console.log(err);
